@@ -1,0 +1,101 @@
+---
+title: "Cardiac Motion Analysis"
+author: "Ash Chaudhari"
+date: "12.05.2026"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Opening the package to create the plots
+library(ggplot2)
+```
+
+## Loading the data
+
+We first load the data we generated from our Python code. 
+
+```{r data}
+#Saving the data in a variable
+motion_data <- read.csv("motion_stats.csv")
+print(motion_data)
+```
+## Creating the plots
+
+We create plots to visualize the data, making it easier to analyze at a glimpse and draw some facts from the generated graphs.
+
+### Boxplot
+
+A boxplot provides a compact summary of how the data is distributed within each group and allows the median and variability of the measurements to be visualized at a glance.
+In this project, boxplots were used to compare the distribution of motion measurements between the normal and reduced-motion heart simulations.
+
+```{r plot1, fig.align='center'}
+#Box plot to summarize how much motion was detected over time for each heart type
+ggplot(motion_data, aes(x = type, y = mean_motion)) + 
+  geom_boxplot()
+```
+\n
+The abnormal condition shows lower overall motion magnitude and lower variability, meaning that the measurements are more concentrated and exhibit less spread. This suggests that the reduced-motion heart simulation generated weaker and more consistent deformation patterns over time.
+
+
+
+### Line graph
+
+A line graph is useful for visualizing how measurements change over time. 
+In this project, a line graph was used to observe how the motion magnitude evolved across consecutive animation frames for the normal and reduced-motion heart simulations.
+
+```{r plot2, fig.align='center'}
+#Graph to visualize motion per frame
+ggplot(motion_data, aes(x =  frame, y = mean_motion, color = type)) +
+  geom_line()
+```
+
+The graph shows that the normal heart simulation consistently exhibits higher motion magnitude across frames compared to the abnormal condition. The abnormal simulation displays weaker motion throughout the sequence, reflecting the reduced deformation amplitude introduced during the synthetic animation generation.
+
+## Statistical analysis tests
+
+We now perform simple statistical analysis using numerical values.
+
+```{r analysis1}
+# Average mean motion for each type
+aggregate(mean_motion ~ type, data = motion_data, mean)
+```
+Firstly, we compute the average mean motion separately for each group, namely the normal and the abnormal types. We can see on average how much motion each condition exhibits and based on the output we understand that the normal heart moves more overall. 
+
+```{r analysis2}
+# Tells us how spatially variable the motion is i.e. if some pixels move more than others in the same frame
+aggregate(std_motion ~ type, data = motion_data, mean)
+```
+Secondly, we compute the average motion variability for each group, meaning the average of the standard deviation of pixel displacement within a frame pair. A high standard deviation means some pixels move a lot while others move little whereas a lower standard deviation indicates that the majority of the pixels move weaker overall and the motion in general is more uniform.
+As per our output we values, we see that the normal heart moves more dynamically and the abnormal heart has flatter motion.
+
+```{r analysis3}
+# To see if the mean motion values are statistically different
+t.test(mean_motion ~ type, data = motion_data)
+```
+Thirdly, we perform a t-test, which tells us if the mean motion values of the two types are statistically different. Essentially we compare the abnormal versus the normal distributions and estimate whether the observed difference could happen randomly. 
+
+For our t-statistic we get a negative t-value since the mean motion of the abnormal type is lower than the mean motion of the normal type hence we get a negative difference. Taking the absolute of the t-value gives us a large number, indicating a strong separation between group means relative to noise.
+
+Our p-value is the probability of observing such an extreme t-statistic assuming the null hypothesis, which says that the mean of the abnormal and normal type are equal, is true. We can see that the p-value is extremely small, meaning that we can reject the null hypothesis with very high confidence i.e. there is strong statistical evidence that the two group means are different. 
+
+The confidence interval is a range of plausible values for the true difference in means. Our output interval tells us the abnormal group is estimated to have a lower mean motion by about 0.09 to 0.18. Because the interval is entirely below 0, it indicates a statistically significant difference between the groups.
+
+## Conclusion
+
+Overall, the analysis shows a clear and consistent difference between the normal and abnormal heart motion simulations. The plots indicate that the normal condition exhibits higher motion magnitude and greater variability across frames, while the abnormal condition shows reduced and more uniform motion patterns.
+
+This visual observation is supported by the numerical summaries, where the normal group has a higher average mean motion and greater spatial variability than the abnormal group. The statistical test further confirms this difference: the t-test yields a large negative t-statistic, a very small p-value, and a confidence interval that is entirely below zero. Together, these results provide strong evidence that the two groups are not the same in terms of motion behavior.
+
+In summary, the reduced-motion simulation successfully produces a statistically and visually distinguishable decrease in cardiac motion compared to the normal case.
+
+
+
+
+
+
+
+
+
