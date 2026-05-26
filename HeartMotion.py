@@ -18,15 +18,19 @@ for t in range(51):
     # Draw white circle
     cv2.circle(img, (100, 100), radius, 255, -1)
 
+    
     normal_frames.append(img)
 
 # Save as video
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
 out = cv2.VideoWriter('normal_heart.mp4', fourcc, 10.0, (200, 200), isColor=False)
 
+# Write frames to video
 for frame in normal_frames:
     out.write(frame)
 
+# Release the video writer
 out.release()
 print("Video saved as normal_heart.mp4")
 
@@ -72,6 +76,7 @@ plt.title("Fake Heart Frame")
 plt.axis('off')
 plt.show()
 '''
+
 # Motion analysis using optical flow
 
 # Compute optical flow between consecutive frames
@@ -102,6 +107,7 @@ for i, flow in enumerate(normal_flows):
     std_motion = np.std(motion_magnitude)
     max_motion = np.max(motion_magnitude)
 
+    # Store results in a list of dictionaries
     results.append({
         "type": "normal",
         "frame": i,
@@ -122,6 +128,7 @@ for i, flow in enumerate(abnormal_flows):
     std_motion = np.std(motion_magnitude)
     max_motion = np.max(motion_magnitude)
 
+    # Store results in a list of dictionaries
     results.append({
         "type": "abnormal",
         "frame": i,
@@ -140,17 +147,3 @@ df = pd.DataFrame(results)
 df.to_csv("motion_stats.csv", index=False)
 
 print(df)
-
-
-'''
-# Visualizes motion magnitude
-plt.imshow(motion_magnitude1, cmap='hot')
-plt.title("Motion Magnitude (Normal Heart)")
-plt.axis('off')
-plt.show()
-
-plt.imshow(motion_magnitude2, cmap='hot')
-plt.title("Motion Magnitude (Abnormal Heart)")
-plt.axis('off')
-plt.show()
-'''
